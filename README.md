@@ -14,6 +14,17 @@ The script parses the intent and maps it to relevant diagnostics:
 - Route analysis
 - VNet peering validation
 
+## Usage
+
+```powershell
+.\Invoke-IntentDiagnostics.ps1 `
+    -Intent "VM cannot reach storage account private endpoint" `
+    -TargetIP 10.1.2.4 `
+    -Hostname storageaccount.blob.core.windows.net `
+    -NicName myNic `
+    -VNetName myVnet `
+    -ResourceGroup myRG
+
 ## Example
 
 Input:
@@ -28,3 +39,12 @@ Output:
 
 This project explores how troubleshooting workflows can be simplified by
 mapping user intent to diagnostics, reducing manual steps and improving consistency.
+
+## Related Project
+
+This project builds on the core troubleshooting scripts available here:
+
+👉 https://github.com/vkucukeksi/azure-network-troubleshooting-toolkit
+
+The toolkit provides the underlying diagnostics, while this project focuses on
+mapping user intent to those diagnostics.
