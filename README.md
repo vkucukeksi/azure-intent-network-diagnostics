@@ -3,7 +3,7 @@
 This project demonstrates a simple intent-driven approach to Azure network troubleshooting.
 
 Instead of manually selecting diagnostic scripts, users provide a description of the issue,
-and the tool determines which checks to run.
+and the script determines which checks to run.
 
 ## How it works
 
@@ -16,6 +16,8 @@ The script parses the intent and maps it to relevant diagnostics:
 
 ## Usage
 
+Run the script by providing an intent along with relevant Azure resource details:
+
 ```powershell
 .\Invoke-IntentDiagnostics.ps1 `
     -Intent "VM cannot reach storage account private endpoint" `
@@ -24,6 +26,7 @@ The script parses the intent and maps it to relevant diagnostics:
     -NicName myNic `
     -VNetName myVnet `
     -ResourceGroup myRG
+```
 
 ## Example
 
