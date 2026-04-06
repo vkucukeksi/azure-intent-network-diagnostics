@@ -10,6 +10,7 @@ param (
     [string]$ResourceGroup
 )
 
+$results = @() # This will hold results from each test for guidance generation
 function Write-Section {
     param ([string]$Title)
 
