@@ -22,12 +22,6 @@ function Write-Section {
 
 Write-Host "Intent Received: $Intent" -ForegroundColor Yellow
 
-# TEMP: Add test result to validate guidance flow
-$results += [PSCustomObject]@{
-    Test   = "Connectivity"
-    Status = "Failed"
-}
-
 
 $intentLower = $Intent.ToLower()
 
@@ -68,7 +62,20 @@ if ($runPeering)     { Write-Host "- VNet Peering Check" }
 
 if ($runConnectivity -and $TargetIP) {
     Write-Section "Connectivity Test"
-    .\Test-VNetConnectivity.ps1 -TargetIP $TargetIP
+
+    $scriptPath = Join-Path $PSScriptRoot "connectivity\Test-VNetConnectivity.ps1"
+    $connResult = & $scriptPath -TargetIP $TargetIP
+
+    $status = "Failed"
+
+    if ($connResult.Status -eq "Success") {
+        $status = "Success"
+    }
+
+    $results += [PSCustomObject]@{
+        Test   = "Connectivity"
+        Status = $status
+    }
 }
 
 if ($runDNS -and $Hostname) {
