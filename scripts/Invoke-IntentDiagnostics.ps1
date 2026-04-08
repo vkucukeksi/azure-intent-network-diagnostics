@@ -10,7 +10,7 @@ param (
     [string]$ResourceGroup
 )
 
-$results = @() # This will hold results from each test for guidance generation
+$results = @() # This will hold results from each test for guidance generations
 function Write-Section {
     param ([string]$Title)
 
@@ -21,6 +21,13 @@ function Write-Section {
 }
 
 Write-Host "Intent Received: $Intent" -ForegroundColor Yellow
+
+# TEMP: Add test result to validate guidance flow
+$results += [PSCustomObject]@{
+    Test   = "Connectivity"
+    Status = "Failed"
+}
+
 
 $intentLower = $Intent.ToLower()
 
@@ -81,3 +88,7 @@ if ($runPeering -and $VNetName -and $ResourceGroup) {
 
 Write-Host ""
 Write-Host "Diagnostics complete." -ForegroundColor Green
+
+# Run guidance engine
+$guidanceScript = Join-Path $PSScriptRoot "Get-TroubleshootingGuidance.ps1"
+& $guidanceScript -Results $results
