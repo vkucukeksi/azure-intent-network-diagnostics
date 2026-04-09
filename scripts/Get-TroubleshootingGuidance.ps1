@@ -21,7 +21,16 @@ if ($Results.Test -contains "DNS") {
     }
 }
 
-# ===== Rule 2: Connectivity failed =====
+# ===== Rule 2: DNS resolution error =====
+if ($Results.Test -contains "DNS") {
+    $dnsResult = $Results | Where-Object { $_.Test -eq "DNS" }
+
+    if ($dnsResult.Status -eq "Error") {
+        $guidance += "DNS resolution failed. Check DNS configuration, private DNS zones, or network connectivity."
+    }
+}
+
+# ===== Rule 3: Connectivity failed =====
 if ($Results.Test -contains "Connectivity") {
     $conn = $Results | Where-Object { $_.Test -eq "Connectivity" }
 
@@ -30,7 +39,7 @@ if ($Results.Test -contains "Connectivity") {
     }
 }
 
-# ===== Rule 3: Routing issue =====
+# ===== Rule 4: Routing issue =====
 if ($Results.Test -contains "Routing") {
     $route = $Results | Where-Object { $_.Test -eq "Routing" }
 

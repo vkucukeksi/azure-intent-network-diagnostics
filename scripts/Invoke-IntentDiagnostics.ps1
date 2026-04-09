@@ -80,12 +80,28 @@ if ($runConnectivity -and $TargetIP) {
 
 if ($runDNS -and $Hostname) {
     Write-Section "DNS Test"
-    .\Test-AzureDNS.ps1 -Hostname $Hostname
+
+    $dnsScript = Join-Path $PSScriptRoot "dns\Test-AzureDNS.ps1"
+    $dnsResult = & $dnsScript -Hostname $Hostname
+
+    $status = "Unknown"
+
+    if ($dnsResult -and $dnsResult.Status) {
+        $status = $dnsResult.Status
+    }
+
+    Write-Host "DNS result: $status" -ForegroundColor DarkGray
+
+    $results += [PSCustomObject]@{
+        Test   = "DNS"
+        Status = $status
+    }
 }
 
 if ($runRouting -and $NicName -and $ResourceGroup) {
     Write-Section "Route Analysis"
-    .\Get-AzureEffectiveRoutes.ps1 -NicName $NicName -ResourceGroup $ResourceGroup
+    $routingScript = Join-Path $PSScriptRoot "routing\Get-AzureEffectiveRoutes.ps1"
+    & $routingScript -NicName $NicName -ResourceGroup $ResourceGroup
 }
 
 if ($runPeering -and $VNetName -and $ResourceGroup) {

@@ -46,22 +46,43 @@ try {
         }
     }
 
-    if (-not $output) {
+    if (-not $output -or $output.Count -eq 0) {
         Write-Log "No IP addresses found" "WARN"
+
+        return [PSCustomObject]@{
+            Status = "Unknown"
+        }
     }
     else {
         Write-Host ""
         Write-Host "DNS Results:" -ForegroundColor Yellow
-        $output | Format-Table -AutoSize
+        $output
     }
 
     # ===== Detect potential issue =====
     if ($output.IPType -contains "Public") {
         Write-Host ""
         Write-Host "WARNING: Public IP detected - check Private Endpoint / DNS configuration" -ForegroundColor Red
+
+        return [PSCustomObject]@{
+            Status = "Public"
+        }
+    }
+    elseif ($output.IPType -contains "Private") {
+        return [PSCustomObject]@{
+            Status = "Private"
+        }
+    }
+    else {
+        return [PSCustomObject]@{
+            Status = "Unknown"
+        }
     }
 }
 catch {
     Write-Log "DNS resolution failed: $_" "ERROR"
-    exit 1
+
+    return [PSCustomObject]@{
+        Status = "Error"
+    }
 }
