@@ -11,41 +11,53 @@ function Write-Log {
 Write-Log "Analysing results..."
 
 $guidance = @()
+$combinedMatch = $false   # ✅ ADD THIS
+
+# ===== Extract results once =====
+$dnsResult  = $Results | Where-Object { $_.Test -eq "DNS" }
+$connResult = $Results | Where-Object { $_.Test -eq "Connectivity" }
+
+# ===== Rule 0b: DNS Error + Connectivity Failed =====
+if ($dnsResult -and $connResult) {
+    if ($dnsResult.Status -eq "Error" -and $connResult.Status -eq "Failed") {
+        $guidance += "Connectivity is failing and DNS resolution failed. This may indicate DNS misconfiguration, missing private DNS zone, or network restrictions blocking DNS queries."
+        $combinedMatch = $true   # ✅ ADD THIS
+    }
+}
+
+# ===== Rule 0: DNS Public + Connectivity Failed =====
+if ($dnsResult -and $connResult) {
+    if ($dnsResult.Status -eq "Public" -and $connResult.Status -eq "Failed") {
+        $guidance += "Connectivity is failing and DNS resolves to a public IP. This strongly indicates a Private Endpoint or DNS misconfiguration."
+        $combinedMatch = $true   # ✅ ADD THIS
+    }
+}
 
 # ===== Rule 1: DNS resolves to public IP =====
-if ($Results.Test -contains "DNS") {
-    $dnsResult = $Results | Where-Object { $_.Test -eq "DNS" }
-
+if (-not $combinedMatch -and $dnsResult) {
     if ($dnsResult.Status -eq "Public") {
         $guidance += "DNS resolves to a public IP. Check Private Endpoint DNS configuration."
     }
 }
 
 # ===== Rule 2: DNS resolution error =====
-if ($Results.Test -contains "DNS") {
-    $dnsResult = $Results | Where-Object { $_.Test -eq "DNS" }
-
+if (-not $combinedMatch -and $dnsResult) {
     if ($dnsResult.Status -eq "Error") {
         $guidance += "DNS resolution failed. Check DNS configuration, private DNS zones, or network connectivity."
     }
 }
 
 # ===== Rule 3: Connectivity failed =====
-if ($Results.Test -contains "Connectivity") {
-    $conn = $Results | Where-Object { $_.Test -eq "Connectivity" }
-
-    if ($conn.Status -eq "Failed") {
+if (-not $combinedMatch -and $connResult) {
+    if ($connResult.Status -eq "Failed") {
         $guidance += "Connectivity test failed. Check NSGs, firewall rules, or routing."
     }
 }
 
 # ===== Rule 4: Routing issue =====
-if ($Results.Test -contains "Routing") {
-    $route = $Results | Where-Object { $_.Test -eq "Routing" }
-
-    if ($route.Status -eq "IssueDetected") {
-        $guidance += "Routing issue detected. Review UDRs and next hop configuration."
-    }
+$route = $Results | Where-Object { $_.Test -eq "Routing" }
+if ($route -and $route.Status -eq "IssueDetected") {
+    $guidance += "Routing issue detected. Review UDRs and next hop configuration."
 }
 
 # ===== Output =====
